@@ -19,7 +19,7 @@ polling_url: |
   {%- assign win = date_from | times: 86400 -%}{%- if umami_hosting == 'cloud' -%}{%- assign base = 'https://api.umami.is/v1' -%}{%- else -%}{%- assign base = umami_url | append: '/api' -%}{%- endif -%}{{base}}/websites/{{umami_website_id}}/stats?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}
   {{base}}/websites/{{umami_website_id}}/pageviews?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}&unit=day
 polling_headers: "{%- if umami_hosting == 'cloud' -%}x-umami-api-key={{umami_token}}{%- else -%}Authorization=Bearer {{umami_token}}{%- endif -%}"
-id: 359416
+id: 367986
 custom_fields:
   - keyname: doesnt_matter
     name: Umami Stats
