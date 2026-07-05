@@ -57,9 +57,15 @@ from `.env` (or prompts), asks for your username/password, and prints the token:
 ./bin/umami-token admin --write   # log in as "admin" and store it in .env
 ```
 
-Or by hand — `POST {UMAMI_URL}/api/auth/login` with `{"username","password"}`
-returns `{ "token": "eyJ…" }`. Use it as `umami_token` (custom field) /
-`UMAMI_TOKEN` (`.env`).
+No repo checked out? Grab a token with a single command — fill in your host,
+username, and password, then paste the printed token into the plugin's **API
+Key / Token** field in the TRMNL UI:
+
+```bash
+curl -s -X POST "https://analytics.example.com/api/auth/login" -H 'Content-Type: application/json' -d '{"username":"admin","password":"YOUR_PASSWORD"}' | jq -r '.token'
+```
+
+No `jq`? Replace the final `| jq -r '.token'` with `| grep -o '"token":"[^"]*"' | cut -d'"' -f4`.
 
 ## Local development
 
