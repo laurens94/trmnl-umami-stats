@@ -1,0 +1,61 @@
+---
+strategy: polling
+no_screen_padding: "yes"
+dark_mode: "no"
+static_data: ""
+polling_verb: get
+framework_version: 3.1.1
+serverless_language: ""
+# Two GET requests per refresh (exposed to the templates as IDX_0 / IDX_1):
+#   IDX_0  /stats     -> visitors, pageviews, visits, bounces (+ comparison)
+#   IDX_1  /pageviews  -> daily pageviews/sessions series (hero sparkline)
+# Umami wants an absolute [startAt, endAt] window in epoch milliseconds, so we
+# derive it in Liquid: endAt = now, startAt = now - date_from days. `win` is the
+# window in seconds; it's assigned once and reused on both lines (single render
+# pass). `base` switches on the umami_hosting field: Umami Cloud lives at
+# api.umami.is/v1 with an x-umami-api-key header; self-hosted is {umami_url}/api
+# with an Authorization: Bearer header. Both differences are resolved in Liquid.
+polling_url: |
+  {%- assign win = date_from | times: 86400 -%}{%- if umami_hosting == 'cloud' -%}{%- assign base = 'https://api.umami.is/v1' -%}{%- else -%}{%- assign base = umami_url | append: '/api' -%}{%- endif -%}{{base}}/websites/{{umami_website_id}}/stats?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}
+  {{base}}/websites/{{umami_website_id}}/pageviews?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}&unit=day
+polling_headers: "{%- if umami_hosting == 'cloud' -%}x-umami-api-key={{umami_token}}{%- else -%}Authorization=Bearer {{umami_token}}{%- endif -%}"
+id: 359416
+custom_fields:
+  - keyname: doesnt_matter
+    name: Umami Stats
+    field_type: author_bio
+    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a pageviews sparkline.
+    github_url: https://github.com/laurens94
+    learn_more_url: https://github.com/laurens94/trmnl-umami-stats
+  - keyname: project_name
+    field_type: string
+    name: Project Name
+    description: Shown in the footer
+  - keyname: umami_hosting
+    field_type: select
+    name: Umami Hosting
+    options:
+      - Umami Cloud: cloud
+      - Self-hosted: self_hosted
+    default: cloud
+    description: Umami Cloud (api.umami.is, API key) or your own self-hosted instance (URL + bearer token).
+  - keyname: umami_url
+    field_type: url
+    name: Umami URL
+    placeholder: https://analytics.example.com
+    description: Self-hosted only — your instance base URL, no trailing slash (the plugin appends /api/websites/…). Ignored for Umami Cloud.
+  - keyname: umami_token
+    field_type: password
+    name: API Key / Token
+    description: Umami Cloud API key, or a self-hosted bearer token.
+    help_text: Cloud — create an API key in your Umami account settings. Self-hosted — run <code>bin/umami-token</code> or POST to <code>/api/auth/login</code>. See the <a href="https://umami.is/docs/api/authentication" class="underline">Umami API docs</a>.
+  - keyname: umami_website_id
+    field_type: string
+    name: Umami Website ID
+    description: The website's UUID (Settings → Websites → Edit → Website ID)
+  - keyname: date_from
+    field_type: number
+    name: No. of days
+    description: The number of days to use for the stats
+name: Umami Stats
+refresh_interval: 15

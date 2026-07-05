@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#
+# Fetch a Umami API bearer token for use as the `umami_token` custom field
+# (env var UMAMI_TOKEN). Wraps the login endpoint documented at
+# https://docs.umami.is/docs/api/authentication:
+#
+#   POST {UMAMI_URL}/api/auth/login  {"username": "...", "password": "..."}
+#     -> { "token": "eyJ…", "user": { … } }
+#
+# Usage:
+#   ./bin/umami-token [username]
+#
+# UMAMI_URL is read from the environment, from .env, or prompted for. The
+# username may be passed as the first argument or via UMAMI_USERNAME; the
+# password is read from UMAMI_PASSWORD or prompted for (never echoed).
+# On success the token is printed; pass --write to also store it in .env.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ENV_FILE="$REPO_ROOT/.env"
+
+die() { echo "error: $*" >&2; exit 1; }
+
+WRITE=0
+USERNAME=""
+for arg in "$@"; do
+  case "$arg" in
+    --write) WRITE=1 ;;
+    -h|--help) awk 'NR>1 && /^#/ {sub(/^# ?/,""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+    -*) die "unknown flag: $arg" ;;
+    *) USERNAME="$arg" ;;
+  esac
+done
+
+command -v curl >/dev/null 2>&1 || die "curl is required but not installed"
+
+# UMAMI_URL: environment wins, else pull it out of .env, else prompt.
+if [ -z "${UMAMI_URL:-}" ] && [ -f "$ENV_FILE" ]; then
+  UMAMI_URL="$(grep -E '^\s*UMAMI_URL=' "$ENV_FILE" | tail -n1 | cut -d= -f2- | tr -d '"'"'"' \r')"
+fi
+if [ -z "${UMAMI_URL:-}" ]; then
+  read -r -p "Umami URL (e.g. https://analytics.example.com): " UMAMI_URL
+fi
+[ -n "${UMAMI_URL:-}" ] || die "no Umami URL provided"
+UMAMI_URL="${UMAMI_URL%/}"   # strip any trailing slash
+
+# Credentials.
+USERNAME="${USERNAME:-${UMAMI_USERNAME:-}}"
+[ -n "$USERNAME" ] || read -r -p "Umami username: " USERNAME
+[ -n "$USERNAME" ] || die "no username provided"
+
+PASSWORD="${UMAMI_PASSWORD:-}"
+if [ -z "$PASSWORD" ]; then
+  read -r -s -p "Umami password: " PASSWORD; echo
+fi
+[ -n "$PASSWORD" ] || die "no password provided"
+
+# JSON-encode the credentials so quotes/backslashes can't break the body.
+json_escape() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+BODY="{\"username\":\"$(json_escape "$USERNAME")\",\"password\":\"$(json_escape "$PASSWORD")\"}"
+
+echo "→ POST $UMAMI_URL/api/auth/login" >&2
+RESPONSE="$(curl -sS -w $'\n%{http_code}' \
+  -X POST "$UMAMI_URL/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "$BODY")" || die "request failed (is the URL reachable?)"
+
+STATUS="$(printf '%s' "$RESPONSE" | tail -n1)"
+PAYLOAD="$(printf '%s' "$RESPONSE" | sed '$d')"
+
+if [ "$STATUS" != "200" ]; then
+  die "login failed (HTTP $STATUS): ${PAYLOAD:-<empty response>}"
+fi
+
+# Prefer jq if present; fall back to a plain grep (the token is base64url,
+# so it contains no quotes to trip up the pattern).
+if command -v jq >/dev/null 2>&1; then
+  TOKEN="$(printf '%s' "$PAYLOAD" | jq -r '.token // empty')"
+else
+  TOKEN="$(printf '%s' "$PAYLOAD" | grep -o '"token":"[^"]*"' | head -n1 | cut -d'"' -f4)"
+fi
+[ -n "$TOKEN" ] || die "no token in response: $PAYLOAD"
+
+if [ "$WRITE" -eq 1 ]; then
+  [ -f "$ENV_FILE" ] || die "--write: no .env at $ENV_FILE (copy .env.example first)"
+  if grep -qE '^\s*UMAMI_TOKEN=' "$ENV_FILE"; then
+    # Replace the existing line in place (temp file keeps it atomic-ish).
+    tmp="$(mktemp)"
+    sed "s|^\s*UMAMI_TOKEN=.*|UMAMI_TOKEN=$TOKEN|" "$ENV_FILE" > "$tmp" && mv "$tmp" "$ENV_FILE"
+  else
+    printf 'UMAMI_TOKEN=%s\n' "$TOKEN" >> "$ENV_FILE"
+  fi
+  echo "✓ wrote UMAMI_TOKEN to .env" >&2
+else
+  echo "✓ token (set as UMAMI_TOKEN in .env, or paste into the plugin's Umami Token field):" >&2
+fi
+
+# The token itself goes to stdout so it can be piped/captured.
+printf '%s\n' "$TOKEN"

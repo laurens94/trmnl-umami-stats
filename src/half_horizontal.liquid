@@ -1,0 +1,17 @@
+{%- comment -%} Layout only — data prep + um_* partials live in src/shared.liquid. {%- endcomment -%}
+<div class="layout layout--col gap--space-between bg--gray-70 dark:bg--white p--4">
+  {%- if api_error != blank -%}
+    {% render "um_notice" with title: "Umami error", body: api_error %}
+  {%- elsif has_data -%}
+    <div class="grid grid--cols-4 gap--small">
+      {% render "um_metric" with value: visitors, label: "Visitors", delta: visitors_delta, suffix: "%", value_class: "value--large" %}
+      {% render "um_metric" with value: pageviews, label: "Pageviews", delta: pageviews_delta, suffix: "%", value_class: "value--large" %}
+      {% render "um_metric" with value: visits, label: "Visits", delta: visits_delta, suffix: "%", value_class: "value--large" %}
+      {% render "um_metric" with value: bounce_rate, label: "Bounce Rate", delta: bounce_delta, suffix: "pt", value_suffix: "%", value_class: "value--large" %}
+    </div>
+  {%- else -%}
+    {% render "um_notice" with title: "No data", body: "No response from Umami. Check the trmnlp server log for the API error." %}
+  {%- endif -%}
+</div>
+
+{% render "um_title_bar" with trmnl: trmnl %}

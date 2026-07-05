@@ -1,0 +1,29 @@
+# TRMNL configuration
+# {{ env.VARIABLE }} interpolation is available here
+---
+# auto-reload when files change (`watch: false` to disable)
+watch:
+  - .trmnlp.yml
+  - src
+
+# values of custom fields (defined in src/settings.yml)
+#
+# IMPORTANT: {{ env.* }} is only interpolated for fields that get substituted
+# into the polling request (umami_url / umami_token / umami_website_id).
+# Fields the Liquid template reads directly — like project_name — are NOT
+# env-interpolated by trmnlp, so they must be plain literals here, otherwise
+# the raw "{{ env.X }}" string renders on screen.
+#
+# Secrets live in .env (gitignored); copy .env.example to .env and fill it in.
+# bin/trmnlp loads .env automatically.
+custom_fields:
+  umami_hosting: self_hosted
+  umami_url: "{{ env.UMAMI_URL }}"
+  umami_token: "{{ env.UMAMI_TOKEN }}"
+  umami_website_id: "{{ env.UMAMI_WEBSITE_ID }}"
+  project_name: "Umami Stats"
+  date_from: 30
+
+# override variables
+variables:
+  trmnl: {}
