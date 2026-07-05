@@ -25,8 +25,7 @@ custom_fields:
     name: Umami Stats
     field_type: author_bio
     description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a pageviews sparkline.
-    github_url: https://github.com/laurens94
-    learn_more_url: https://github.com/laurens94/trmnl-umami-stats
+    github_url: https://github.com/laurens94/trmnl-umami-stats
   - keyname: project_name
     field_type: string
     name: Project Name
