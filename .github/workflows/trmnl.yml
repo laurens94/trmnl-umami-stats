@@ -2,7 +2,7 @@ name: TRMNL
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   lint:
@@ -17,7 +17,7 @@ jobs:
 
   push:
     needs: lint
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

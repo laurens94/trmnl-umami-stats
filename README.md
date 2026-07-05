@@ -80,5 +80,5 @@ cp .env.example .env     # then fill in your Umami credentials
 `{{ env.* }}`. Note: only fields used in the polling request are
 env-interpolated — `project_name` must be a plain literal.
 
-Every push to `main` runs `trmnlp lint` and deploys to TRMNL. Add a
+Every push to `master` runs `trmnlp lint` and deploys to TRMNL. Add a
 `TRMNL_API_KEY` repository secret (see `.github/workflows/trmnl.yml`).
