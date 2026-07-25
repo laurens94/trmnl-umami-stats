@@ -8,7 +8,7 @@ framework_version: 3.1.1
 serverless_language: ""
 # Two GET requests per refresh (exposed to the templates as IDX_0 / IDX_1):
 #   IDX_0  /stats     -> visitors, pageviews, visits, bounces (+ comparison)
-#   IDX_1  /pageviews  -> daily pageviews/sessions series (hero sparkline)
+#   IDX_1  /pageviews  -> daily pageviews/sessions series (the chart's two lines)
 # Umami wants an absolute [startAt, endAt] window in epoch milliseconds, so we
 # derive it in Liquid: endAt = now, startAt = now - date_from days. `win` is the
 # window in seconds; it's assigned once and reused on both lines (single render
@@ -24,7 +24,7 @@ custom_fields:
   - keyname: author_bio
     name: Umami Stats
     field_type: author_bio
-    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a pageviews sparkline. Questions or bugs? Open an issue at <a href="https://github.com/laurens94/trmnl-umami-stats/issues" class="underline">github.com/laurens94/trmnl-umami-stats</a>.
+    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a daily chart of visitors and pageviews.
     github_url: https://github.com/laurens94/trmnl-umami-stats
   - keyname: project_name
     field_type: string
@@ -58,5 +58,22 @@ custom_fields:
     default: 30
     placeholder: 30 (default)
     description: The number of days to use for the stats
+  - keyname: chart_lines
+    field_type: select
+    name: Chart Lines
+    options:
+      - Visitors + Pageviews: both
+      - Visitors only: visitors
+      - Pageviews only: pageviews
+    default: both
+    description: Which daily lines the chart draws — Visitors is solid, Pageviews dotted.
+  - keyname: chart_axes
+    field_type: select
+    name: Chart Y Axis
+    options:
+      - Shared: single
+      - One per line: dual
+    default: single
+    description: Only applies when both lines are shown. Pageviews outnumber visitors, so a shared axis flattens the Visitors line; one axis per line (left = Visitors, right = Pageviews) gives each its own scale.
 name: Umami Stats
 refresh_interval: 15

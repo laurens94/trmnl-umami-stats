@@ -22,7 +22,9 @@ custom_fields:
   umami_token: "{{ env.UMAMI_TOKEN }}"
   umami_website_id: "{{ env.UMAMI_WEBSITE_ID }}"
   project_name: "Umami Stats"
-  date_from: 30
+  date_from: 14
+  chart_lines: both
+  chart_axes: dual
 
 # override variables
 variables:

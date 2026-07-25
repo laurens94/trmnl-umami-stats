@@ -21,10 +21,10 @@
                                         totaltime, comparison: {...prev totals} }
     IDX_1  /websites/:id/pageviews -> { pageviews: [{x,y}...], sessions: [...] }
 
-  `visitors/pageviews/visits/bounces` are the period totals (headline + tiles).
+  `visitors/pageviews/visits/bounces` are the period totals shown in the tiles.
   `comparison` holds the previous period's totals, from which we derive each
-  tile's % change (percentage-point change for bounce rate). `pv_series` is the
-  daily pageviews array driving the hero sparkline.
+  tile's % change (percentage-point change for bounce rate). IDX_1's two daily
+  series drive the chart; Umami has no daily `visits` series.
 
   A genuine 0 stays 0; a missing metric stays nil (views render "—"). trmnlp's
   poller discards non-200 response bodies (returns {} and logs the error to the
@@ -51,8 +51,26 @@
   {%- assign bounce_rate = bounces | times: 100.0 | divided_by: visits | round -%}
 {%- endif -%}
 
-{%- comment -%} Daily pageviews series for the hero sparkline (just the y values). {%- endcomment -%}
-{%- assign pv_series = IDX_1.pageviews | map: 'y' -%}
+{%- comment -%}
+  Daily [{x,y}] series for the chart. Umami's `sessions` counts distinct
+  visitors per day, so it is the daily counterpart of the `visitors` total.
+{%- endcomment -%}
+{%- assign pv_points = IDX_1.pageviews -%}
+{%- assign visitor_points = IDX_1.sessions -%}
+
+{%- comment -%}
+  Chart options. `chart_lines` picks the series; `chart_axes` only matters when
+  both are drawn, since one series always fits one axis.
+{%- endcomment -%}
+{%- assign chart_lines = trmnl.plugin_settings.custom_fields_values.chart_lines | default: 'both' -%}
+{%- assign show_visitors = false -%}
+{%- assign show_pageviews = false -%}
+{%- if chart_lines != 'pageviews' -%}{%- assign show_visitors = true -%}{%- endif -%}
+{%- if chart_lines != 'visitors' -%}{%- assign show_pageviews = true -%}{%- endif -%}
+{%- assign dual_axes = false -%}
+{%- if chart_lines == 'both' and trmnl.plugin_settings.custom_fields_values.chart_axes == 'dual' -%}
+  {%- assign dual_axes = true -%}
+{%- endif -%}
 
 {%- comment -%}
   Deltas vs. the previous period, from IDX_0.comparison. Counts get a % change;
@@ -120,26 +138,65 @@
 {% endtemplate %}
 
 {%- comment -%}
-  um_hero — full-width daily pageviews spline with a small explanatory label.
-  Params: period (days), pv_series (daily pageviews array), chart_h (chart
-  height in px, tuned per layout; default 96).
+  um_chart — daily splines with dated x ticks: Visitors solid, Pageviews dotted.
+  Params: pv_points / visitor_points ([{x,y}] arrays), show_visitors /
+  show_pageviews (booleans, from the Chart Lines field), dual_axes (boolean,
+  from Chart Y Axis — pageviews outnumber visitors by roughly an order of
+  magnitude, so a shared axis flattens the visitors line while two axes give
+  each series its own scale), chart_h (height in px, tuned per layout).
 {%- endcomment -%}
-{% template um_hero %}
-{% assign chart_id = 'um-hero-' | append_random %}
-<div class="item bg--white dark:bg--gray-60 rounded--medium p--4 flex flex--col gap--small">
-  <span class="label">Pageviews &middot; Past {{ period | default: 30 }} days</span>
-  <div class="grow" style="height: {{ chart_h | default: 96 }}px;" id="{{ chart_id }}"></div>
+{% template um_chart %}
+{% assign chart_id = 'um-chart-' | append_random %}
+<div class="item bg--white dark:bg--gray-60 rounded--medium py--4 px--1">
+  <div class="w--full grow" style="height: {{ chart_h | default: 160 }}px;" id="{{ chart_id }}"></div>
 </div>
 <script type="text/javascript">
   (function () {
-    var ys = [{% for v in pv_series %}{{ v }}{% unless forloop.last %}, {% endunless %}{% endfor %}];
+    var labels = { style: { fontSize: "16px", color: "#000000" } };
+    {%- comment -%} Umami omits days with no traffic; restore them as 0 so the line doesn't interpolate across them. {%- endcomment -%}
+    var fillGaps = function (points) {
+      if (!points.length) { return points; }
+      var day = 86400000, last = points[points.length - 1][0], out = [], i = 0;
+      for (var t = points[0][0]; t <= last; t += day) {
+        out.push([t, points[i] && points[i][0] === t ? points[i++][1] : 0]);
+      }
+      return out;
+    };
+    var dual = {% if dual_axes %}true{% else %}false{% endif %};
+    var series = [];
+    {%- if show_visitors -%}
+    series.push({ name: "Visitors", dashStyle: "Solid", data: fillGaps([{% for p in visitor_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}]{% unless forloop.last %}, {% endunless %}{% endfor %}]) });
+    {%- endif -%}
+    {%- if show_pageviews -%}
+    series.push({ name: "Pageviews", dashStyle: "ShortDot", yAxis: dual ? 1 : 0, data: fillGaps([{% for p in pv_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}]{% unless forloop.last %}, {% endunless %}{% endfor %}]) });
+    {%- endif -%}
+    var yAxis = { title: { text: null }, min: 0, tickAmount: 4, labels: labels, gridLineWidth: 1, gridLineColor: "#000000", gridLineDashStyle: "ShortDot" };
+    {%- comment -%}
+      Dual axes name their series in a title sitting above each axis — left for
+      Visitors, right for Pageviews — so the legend would only repeat them. The
+      dash prefix stands in for the legend's line symbol. Both axes keep
+      tickAmount: 4 so their gridlines line up; only the left one draws them.
+    {%- endcomment -%}
+    var axisTitle = function (text, side) {
+      return { text: text, align: "high", textAlign: side, rotation: 0, offset: 0, y: -12, reserveSpace: false, style: { fontSize: "16px", color: "#000000" } };
+    };
     var draw = function () {
       Highcharts.chart("{{ chart_id }}", {
-        chart: { type: "spline", height: null, margin: [6, 6, 6, 6], spacing: [0, 0, 0, 0], backgroundColor: "transparent" },
-        title: { text: null }, credits: { enabled: false }, legend: { enabled: false }, tooltip: { enabled: false },
-        xAxis: { visible: false }, yAxis: { visible: false, startOnTick: false, endOnTick: false },
-        plotOptions: { spline: { color: "#666666", lineWidth: 3, marker: { enabled: false } }, series: { clip: false } },
-        series: [{ data: ys }]
+        {%- comment -%} Dual axes need top spacing for their titles; single-axis charts get it from the legend. {%- endcomment -%}
+        chart: { type: "spline", height: null, spacing: [dual ? 32 : 2, 4, 0, 0], backgroundColor: "transparent" },
+        title: { text: null }, credits: { enabled: false }, tooltip: { enabled: false },
+        legend: { enabled: !dual, align: "right", verticalAlign: "top", margin: 4, padding: 0, symbolWidth: 28, itemStyle: { fontSize: "16px", fontWeight: "400", color: "#000000" } },
+        xAxis: {
+          type: "datetime", labels: labels, tickPixelInterval: 110,
+          lineWidth: 1, lineColor: "#000000", tickWidth: 0,
+          gridLineWidth: 1, gridLineColor: "#000000", gridLineDashStyle: "Dot"
+        },
+        yAxis: dual ? [
+          Highcharts.merge(yAxis, { title: axisTitle("— Visitors", "left") }),
+          Highcharts.merge(yAxis, { gridLineWidth: 0, opposite: true, title: axisTitle("⋯ Pageviews", "right") })
+        ] : yAxis,
+        plotOptions: { spline: { color: "#000000", lineWidth: 3, marker: { enabled: false }, enableMouseTracking: false } },
+        series: series
       });
     };
     if (document.readyState !== "loading") { draw(); } else { document.addEventListener("DOMContentLoaded", draw); }

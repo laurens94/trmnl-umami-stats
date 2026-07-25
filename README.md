@@ -3,7 +3,7 @@
 A [TRMNL](https://usetrmnl.com) e-ink plugin that shows your [Umami](https://umami.is)
 web-analytics at a glance: **visitors**, **pageviews**, **visits**, and **bounce
 rate** for the period, each with its **change vs. the previous period**, plus a
-pageviews **spline sparkline** in the headline.
+**daily chart** of visitors (solid) and pageviews (dotted) with dated axis ticks.
 
 Built on TRMNL **Framework v3** and tuned for **TRMNL X** (responsive sizing,
 light-gray theme with white cards). Renders across all four layouts: `full`,
@@ -17,8 +17,9 @@ Each refresh, the plugin makes two Umami API calls (exposed to the templates as
 - `GET {base}/websites/{id}/stats` → period totals (`visitors`, `pageviews`,
   `visits`, `bounces`) plus a `comparison` block with the previous period's
   totals, which drives the ▲/▼ deltas on each tile.
-- `GET {base}/websites/{id}/pageviews?unit=day` → the daily pageviews series
-  that draws the hero sparkline.
+- `GET {base}/websites/{id}/pageviews?unit=day` → the two daily series behind the
+  chart: `pageviews`, and `sessions` (distinct visitors per day). Umami exposes no
+  daily **visits** series, so the chart pairs visitors with pageviews.
 
 `{base}` is `https://api.umami.is/v1` (Umami Cloud) or `{umami_url}/api`
 (self-hosted), chosen by the **Umami Hosting** field — which also switches the
@@ -26,9 +27,9 @@ auth header (`x-umami-api-key` vs. `Authorization: Bearer`).
 
 Umami wants an absolute `[startAt, endAt]` window in epoch **milliseconds**, so
 the polling URL derives it in Liquid: `endAt = now`, `startAt = now − date_from
-days`. The headline shows period **Visitors** with the **Bounce Rate**
-alongside; the four tiles show each metric with its change vs. the previous
-period (percentage-point change for bounce rate).
+days`. The four tiles show each metric with its change vs. the previous period
+(percentage-point change for bounce rate); Umami returns no `comparison` data
+when the preceding window is empty, so those tiles then read `—`.
 
 ## Configuration
 
@@ -42,6 +43,8 @@ Set these custom fields (in the TRMNL UI, or in `.trmnlp.yml` for local dev):
 | `umami_website_id` | The website's UUID (Umami → Settings → Websites → Edit → Website ID) |
 | `project_name` | Shown in the footer |
 | `date_from` | Days of history to fetch (e.g. `30`) |
+| `chart_lines` | Which lines the chart draws: `both`, `visitors`, or `pageviews` |
+| `chart_axes` | With both lines: `single` shared y axis, or `dual` (left = visitors, right = pageviews) |
 
 ### Getting an API key / token
 

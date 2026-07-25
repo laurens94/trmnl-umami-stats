@@ -9,7 +9,7 @@
       would win the cascade and unhide the chart everywhere.
     {%- endcomment -%}
     <div class="hidden lg:grid">
-      {% render "um_hero" with period: trmnl.plugin_settings.custom_fields_values.date_from, pv_series: pv_series %}
+      {% render "um_chart" with pv_points: pv_points, visitor_points: visitor_points, show_visitors: show_visitors, show_pageviews: show_pageviews, dual_axes: dual_axes %}
     </div>
 
     <div class="grid grid--cols-2 portrait:grid--cols-1 lg:portrait:grid--cols-2 gap--small">
