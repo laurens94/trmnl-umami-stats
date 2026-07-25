@@ -99,7 +99,7 @@
   e.g. to hide it on cramped screens). Isolated scope, so all data is passed in.
 {%- endcomment -%}
 {% template um_metric %}
-<div class="item bg--white dark:bg--gray-60 rounded--medium">
+<div class="item bg--white rounded--medium">
   <div class="content w--full">
     <div class="px--4 pt--4 w--full">
       <span class="value value--tnums {{ value_class }}" data-fit-value="true">
@@ -140,12 +140,11 @@
 {%- endcomment -%}
 {% template um_chart %}
 {% assign chart_id = 'um-chart-' | append_random %}
-<div class="item bg--white dark:bg--gray-60 rounded--medium py--4 px--1">
+<div class="item bg--white rounded--medium py--4 px--1">
   <div class="w--full h--full" id="{{ chart_id }}"></div>
 </div>
 <script type="text/javascript">
   (function () {
-    var labels = { style: { fontSize: "16px", color: "#000000" } };
     {%- comment -%} Umami omits days with no traffic; restore them as 0 so the line doesn't interpolate across them. {%- endcomment -%}
     var fillGaps = function (points) {
       if (!points.length) { return points; }
@@ -163,32 +162,36 @@
     {%- if show_pageviews -%}
     series.push({ name: "Pageviews", dashStyle: "ShortDot", yAxis: dual ? 1 : 0, data: fillGaps([{% for p in pv_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}]{% unless forloop.last %}, {% endunless %}{% endfor %}]) });
     {%- endif -%}
-    var yAxis = { title: { text: null }, min: 0, tickAmount: 4, labels: labels, gridLineWidth: 1, gridLineColor: "#000000", gridLineDashStyle: "ShortDot" };
     {%- comment -%}
       Dual axes name their series in a title sitting above each axis — left for
       Visitors, right for Pageviews — so the legend would only repeat them. The
       dash prefix stands in for the legend's line symbol. Both axes keep
       tickAmount: 4 so their gridlines line up; only the left one draws them.
     {%- endcomment -%}
-    var axisTitle = function (text, side) {
-      return { text: text, align: "high", textAlign: side, rotation: 0, offset: 0, y: -12, reserveSpace: false, style: { fontSize: "16px", color: "#000000" } };
+    var axisTitle = function (text, side, ink) {
+      return { text: text, align: "high", textAlign: side, rotation: 0, offset: 0, y: -12, reserveSpace: false, style: { fontSize: "16px", color: ink } };
     };
     var draw = function () {
-      Highcharts.chart("{{ chart_id }}", {
+      {%- comment -%} Inherit the card's text colour so the chart flips with dark mode. {%- endcomment -%}
+      var el = document.getElementById("{{ chart_id }}");
+      var ink = getComputedStyle(el).color;
+      var labels = { style: { fontSize: "16px", color: ink } };
+      var yAxis = { title: { text: null }, min: 0, tickAmount: 4, labels: labels, gridLineWidth: 1, gridLineColor: ink, gridLineDashStyle: "ShortDot" };
+      Highcharts.chart(el, {
         {%- comment -%} Dual axes need top spacing for their titles; single-axis charts get it from the legend. {%- endcomment -%}
         chart: { type: "spline", height: null, spacing: [dual ? 32 : 2, 4, 0, 0], backgroundColor: "transparent" },
         title: { text: null }, credits: { enabled: false }, tooltip: { enabled: false },
-        legend: { enabled: !dual, align: "right", verticalAlign: "top", margin: 4, padding: 0, symbolWidth: 28, itemStyle: { fontSize: "16px", fontWeight: "400", color: "#000000" } },
+        legend: { enabled: !dual, align: "right", verticalAlign: "top", margin: 4, padding: 0, symbolWidth: 28, itemStyle: { fontSize: "16px", fontWeight: "400", color: ink } },
         xAxis: {
           type: "datetime", labels: labels, tickPixelInterval: 110,
-          lineWidth: 1, lineColor: "#000000", tickWidth: 0,
-          gridLineWidth: 1, gridLineColor: "#000000", gridLineDashStyle: "Dot"
+          lineWidth: 1, lineColor: ink, tickWidth: 0,
+          gridLineWidth: 1, gridLineColor: ink, gridLineDashStyle: "Dot"
         },
         yAxis: dual ? [
-          Highcharts.merge(yAxis, { title: axisTitle("— Visitors", "left") }),
-          Highcharts.merge(yAxis, { gridLineWidth: 0, opposite: true, title: axisTitle("⋯ Pageviews", "right") })
+          Highcharts.merge(yAxis, { title: axisTitle("— Visitors", "left", ink) }),
+          Highcharts.merge(yAxis, { gridLineWidth: 0, opposite: true, title: axisTitle("⋯ Pageviews", "right", ink) })
         ] : yAxis,
-        plotOptions: { spline: { color: "#000000", lineWidth: 3, marker: { enabled: false }, enableMouseTracking: false } },
+        plotOptions: { spline: { color: ink, lineWidth: 3, marker: { enabled: false }, enableMouseTracking: false } },
         series: series
       });
     };
@@ -203,7 +206,7 @@
 {%- endcomment -%}
 {% template um_notice %}
 <div class="grid">
-  <div class="item bg--white dark:bg--gray-60 rounded--medium p--4">
+  <div class="item bg--white rounded--medium p--4">
     <div class="content">
       <span class="value value--large lg:value--xlarge">{{ title }}</span>
       <span class="label">{{ body }}</span>
@@ -217,7 +220,7 @@
   must be passed since render scope is isolated).
 {%- endcomment -%}
 {% template um_title_bar %}
-<div class="title_bar bg--white dark:bg--gray-60">
+<div class="title_bar bg--white">
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 428 389.11">
     <g><g><circle cx="214.15" cy="181" r="171" fill="#fff" stroke="#000" stroke-miterlimit="10" stroke-width="20"></circle><path d="M413 134.11H15.29a15 15 0 0 0-15 15v15.3C.12 168 0 171.52 0 175.11c0 118.19 95.81 214 214 214 116.4 0 211.1-92.94 213.93-208.67 0-.44.07-.88.07-1.33v-30a15 15 0 0 0-15-15"></path></g></g>
   </svg>
