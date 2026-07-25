@@ -8,7 +8,7 @@
       lg:grid": the framework re-emits .grid after .hidden, so a base grid class
       would win the cascade and unhide the chart everywhere.
     {%- endcomment -%}
-    <div class="hidden lg:grid">
+    <div class="hidden lg:grid h--40 lg:grow lg:mb--2">
       {% render "um_chart" with pv_points: pv_points, visitor_points: visitor_points, show_visitors: show_visitors, show_pageviews: show_pageviews, dual_axes: dual_axes %}
     </div>
 

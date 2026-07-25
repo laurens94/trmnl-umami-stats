@@ -3,14 +3,6 @@
   // No animation anywhere
   Highcharts.setOptions({ chart: { animation: false }, plotOptions: { series: { animation: false } } });
 </script>
-<style>
-  .highcharts-container,
-  .highcharts-container * {
-    transition: none !important;
-    animation: none !important;
-  }
-</style>
-
 {%- comment -%}
   Shared data prep — trmnlp automatically prepends this file (src/shared.liquid)
   to every view, so the variables and {% template %} partials below are
@@ -143,12 +135,13 @@
   show_pageviews (booleans, from the Chart Lines field), dual_axes (boolean,
   from Chart Y Axis — pageviews outnumber visitors by roughly an order of
   magnitude, so a shared axis flattens the visitors line while two axes give
-  each series its own scale), chart_h (height in px, tuned per layout).
+  each series its own scale). The chart fills its card, so each layout sizes it
+  on the wrapping .grid.
 {%- endcomment -%}
 {% template um_chart %}
 {% assign chart_id = 'um-chart-' | append_random %}
 <div class="item bg--white dark:bg--gray-60 rounded--medium py--4 px--1">
-  <div class="w--full grow" style="height: {{ chart_h | default: 160 }}px;" id="{{ chart_id }}"></div>
+  <div class="w--full h--full" id="{{ chart_id }}"></div>
 </div>
 <script type="text/javascript">
   (function () {

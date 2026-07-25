@@ -3,8 +3,8 @@
   {%- if api_error != blank -%}
     {% render "um_notice" with title: error_title, body: api_error %}
   {%- elsif has_data -%}
-    <div class="grid">
-      {% render "um_chart" with pv_points: pv_points, visitor_points: visitor_points, show_visitors: show_visitors, show_pageviews: show_pageviews, dual_axes: dual_axes, chart_h: 210 %}
+    <div class="grid h--52 sm:grow sm:mb--2">
+      {% render "um_chart" with pv_points: pv_points, visitor_points: visitor_points, show_visitors: show_visitors, show_pageviews: show_pageviews, dual_axes: dual_axes %}
     </div>
 
     <div class="grid grid--cols-4 portrait:grid--cols-2 gap--small">
