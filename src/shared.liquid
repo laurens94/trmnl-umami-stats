@@ -1,6 +1,15 @@
-<!-- Highcharts + Chartkick, served by TRMNL (same libs the framework uses in production) -->
-<script src="https://usetrmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
-<script src="https://usetrmnl.com/js/chartkick/5.0.1/chartkick.min.js"></script>
+<script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
+<script type="text/javascript">
+  // No animation anywhere
+  Highcharts.setOptions({ chart: { animation: false }, plotOptions: { series: { animation: false } } });
+</script>
+<style>
+  .highcharts-container,
+  .highcharts-container * {
+    transition: none !important;
+    animation: none !important;
+  }
+</style>
 
 {%- comment -%}
   Shared data prep — trmnlp automatically prepends this file (src/shared.liquid)
@@ -25,6 +34,11 @@
 {%- assign api_error = IDX_0.error -%}
 {%- assign has_data = false -%}
 {%- if IDX_0.visitors != blank or IDX_0.pageviews != blank -%}{%- assign has_data = true -%}{%- endif -%}
+
+{%- comment -%} Notice copy, shared by all four layouts. {%- endcomment -%}
+{%- assign no_data_title = 'Not connected' -%}
+{%- assign no_data_body = 'Umami returned no data. Check the API key, Website ID and hosting type in this plugin&rsquo;s settings.' -%}
+{%- assign error_title = 'Umami error' -%}
 
 {%- assign visitors = IDX_0.visitors -%}
 {%- assign pageviews = IDX_0.pageviews -%}
@@ -71,7 +85,8 @@
   um_metric — one metric tile: big number + a "change vs. previous period" line.
   Params: value (number|nil), label, delta (signed number|nil), suffix ("%" or
   "pt" for the delta unit), value_suffix (appended to the number, e.g. "%"),
-  value_class (size classes). Isolated scope, so all data is passed in.
+  value_class (size classes), delta_class (extra classes on the delta line,
+  e.g. to hide it on cramped screens). Isolated scope, so all data is passed in.
 {%- endcomment -%}
 {% template um_metric %}
 <div class="item bg--white dark:bg--gray-60 rounded--medium">
@@ -87,7 +102,7 @@
       </span>
     </div>
     <span class="label px--4">{{ label }}</span>
-    <span class="label px--4 pb--4">
+    <span class="label px--4 pb--4 {{ delta_class }}">
       {%- if delta == blank -%}
         —
       {%- elsif delta > 0 -%}
@@ -105,35 +120,25 @@
 {% endtemplate %}
 
 {%- comment -%}
-  um_hero — wide headline tile: period visitors + label on the left, a daily
-  pageviews spline sparkline in the middle, bounce rate on the right.
-  Params: value (visitors), value_class, period (days), bounce (rate %),
-  pv_series (daily pageviews array).
+  um_hero — full-width daily pageviews spline with a small explanatory label.
+  Params: period (days), pv_series (daily pageviews array), chart_h (chart
+  height in px, tuned per layout; default 96).
 {%- endcomment -%}
 {% template um_hero %}
 {% assign chart_id = 'um-hero-' | append_random %}
-<div class="item bg--white dark:bg--gray-60 rounded--medium p--4 gap">
-  <div class="content">
-    <span class="value value--tnums {{ value_class }}" data-fit-value="true">{{ value | default: '—' }}</span>
-    <span class="label">Visitors (Past {{ period | default: 30 }} Days)</span>
-  </div>
-  <div class="grow" style="height: 96px;" id="{{ chart_id }}"></div>
-  <div class="content text--center">
-    <span class="value value--tnums value--large">
-      {%- if bounce == blank %}—{% else %}{{ bounce }}%{% endif -%}
-    </span>
-    <span class="label">Bounce Rate</span>
-  </div>
+<div class="item bg--white dark:bg--gray-60 rounded--medium p--4 flex flex--col gap--small">
+  <span class="label">Pageviews &middot; Past {{ period | default: 30 }} days</span>
+  <div class="grow" style="height: {{ chart_h | default: 96 }}px;" id="{{ chart_id }}"></div>
 </div>
 <script type="text/javascript">
   (function () {
     var ys = [{% for v in pv_series %}{{ v }}{% unless forloop.last %}, {% endunless %}{% endfor %}];
     var draw = function () {
       Highcharts.chart("{{ chart_id }}", {
-        chart: { type: "spline", height: 96, margin: [6, 6, 6, 6], spacing: [0, 0, 0, 0], backgroundColor: "transparent", animation: false },
+        chart: { type: "spline", height: null, margin: [6, 6, 6, 6], spacing: [0, 0, 0, 0], backgroundColor: "transparent" },
         title: { text: null }, credits: { enabled: false }, legend: { enabled: false }, tooltip: { enabled: false },
         xAxis: { visible: false }, yAxis: { visible: false, startOnTick: false, endOnTick: false },
-        plotOptions: { spline: { color: "#666666", lineWidth: 3, marker: { enabled: false }, animation: false }, series: { animation: false, clip: false } },
+        plotOptions: { spline: { color: "#666666", lineWidth: 3, marker: { enabled: false } }, series: { clip: false } },
         series: [{ data: ys }]
       });
     };
@@ -166,7 +171,7 @@
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 428 389.11">
     <g><g><circle cx="214.15" cy="181" r="171" fill="#fff" stroke="#000" stroke-miterlimit="10" stroke-width="20"></circle><path d="M413 134.11H15.29a15 15 0 0 0-15 15v15.3C.12 168 0 171.52 0 175.11c0 118.19 95.81 214 214 214 116.4 0 211.1-92.94 213.93-208.67 0-.44.07-.88.07-1.33v-30a15 15 0 0 0-15-15"></path></g></g>
   </svg>
-  <span class="title">{{ trmnl.plugin_settings.custom_fields_values.project_name }}</span>
+  <span class="title">{{ trmnl.plugin_settings.custom_fields_values.project_name | truncate: 32 }}</span>
   <span class="instance">Past {{ trmnl.plugin_settings.custom_fields_values.date_from | default: 30 }} days</span>
 </div>
 {% endtemplate %}

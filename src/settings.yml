@@ -21,10 +21,10 @@ polling_url: |
 polling_headers: "{%- if umami_hosting == 'cloud' -%}x-umami-api-key={{umami_token}}{%- else -%}Authorization=Bearer {{umami_token}}{%- endif -%}"
 id: 367986
 custom_fields:
-  - keyname: doesnt_matter
+  - keyname: author_bio
     name: Umami Stats
     field_type: author_bio
-    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a pageviews sparkline.
+    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a pageviews sparkline. Questions or bugs? Open an issue at <a href="https://github.com/laurens94/trmnl-umami-stats/issues" class="underline">github.com/laurens94/trmnl-umami-stats</a>.
     github_url: https://github.com/laurens94/trmnl-umami-stats
   - keyname: project_name
     field_type: string
