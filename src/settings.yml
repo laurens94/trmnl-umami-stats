@@ -47,7 +47,7 @@ custom_fields:
     field_type: password
     name: API Key / Token
     description: Umami Cloud API key, or a self-hosted bearer token.
-    help_text: Cloud — create an API key in your Umami account settings. Self-hosted — run <code>bin/umami-token</code> or POST to <code>/api/auth/login</code>. See the <a href="https://umami.is/docs/api/authentication" class="underline">Umami API docs</a>.
+    help_text: Cloud — create an API key in your Umami account settings. Self-hosted — run <code>curl -s -X POST "https://analytics.example.com/api/auth/login" -H 'Content-Type: application/json' -d '{"username":"admin","password":"YOUR_PASSWORD"}' | jq -r '.token'</code>. See the <a href="https://umami.is/docs/api/authentication" class="underline">Umami API docs</a>.
   - keyname: umami_website_id
     field_type: string
     name: Umami Website ID
