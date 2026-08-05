@@ -77,7 +77,7 @@ custom_fields:
     options:
       - Shared: single
       - One per line: dual
-    default: single
+    default: dual
     description: Only applies when both lines are shown. Pageviews outnumber visitors, so a shared axis flattens the Visitors line; one axis per line (left = Visitors, right = Pageviews) gives each its own scale.
 name: Umami Stats
 refresh_interval: 15
