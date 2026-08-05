@@ -4,7 +4,7 @@ no_screen_padding: "yes"
 dark_mode: "no"
 static_data: ""
 polling_verb: get
-framework_version: 3.1.1
+framework_version: 3.2.0
 serverless_language: ""
 # Two GET requests per refresh (exposed to the templates as IDX_0 / IDX_1):
 #   IDX_0  /stats     -> visitors, pageviews, visits, bounces (+ comparison)

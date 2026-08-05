@@ -5,9 +5,11 @@ web-analytics at a glance: **visitors**, **pageviews**, **visits**, and **bounce
 rate** for the period, each with its **change vs. the previous period**, plus a
 **daily chart** of visitors (solid) and pageviews (dotted) with dated axis ticks.
 
-Built on TRMNL **Framework v3** and tuned for **TRMNL X** (responsive sizing,
-light-gray theme with white cards). Renders across all four layouts: `full`,
-`half_horizontal`, `half_vertical`, and `quadrant`.
+Built on TRMNL **Framework v3.2** and tuned for **TRMNL X**: responsive sizing,
+a light-gray-with-white-cards default that follows your device's **theme and dark
+mode**, and an **adaptive chart** that repaints when the screen's theme, mode or
+scale changes. Renders across all four layouts: `full`, `half_horizontal`,
+`half_vertical`, and `quadrant`.
 
 ## How it works
 
