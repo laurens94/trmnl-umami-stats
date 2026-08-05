@@ -30,6 +30,7 @@ custom_fields:
   - keyname: project_name
     field_type: string
     name: Project Name
+    placeholder: Project Name
     description: Shown in the footer
   - keyname: umami_hosting
     field_type: select
