@@ -8,10 +8,10 @@
     </div>
 
     <div class="grid grid--cols-4 portrait:grid--cols-2 gap--small">
-      {% render "um_metric" with value: visitors, label: "Visitors", delta: visitors_delta, suffix: "%", value_class: "value--large" %}
-      {% render "um_metric" with value: pageviews, label: "Pageviews", delta: pageviews_delta, suffix: "%", value_class: "value--large" %}
-      {% render "um_metric" with value: visits, label: "Visits", delta: visits_delta, suffix: "%", value_class: "value--large" %}
-      {% render "um_metric" with value: bounce_rate, label: "Bounce Rate", delta: bounce_delta, suffix: "pt", value_suffix: "%", value_class: "value--large" %}
+      {% render "um_metric" with value: visitors, label: "Visitors", delta: visitors_delta %}
+      {% render "um_metric" with value: pageviews, label: "Pageviews", delta: pageviews_delta %}
+      {% render "um_metric" with value: visits, label: "Visits", delta: visits_delta %}
+      {% render "um_metric" with value: bounce_rate, label: "Bounce Rate", delta: bounce_delta, suffix: "pt", value_suffix: "%" %}
     </div>
   {%- else -%}
     {% render "um_notice" with title: no_data_title, body: no_data_body %}

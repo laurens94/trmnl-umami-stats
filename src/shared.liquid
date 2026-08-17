@@ -93,12 +93,15 @@
 
 {%- comment -%}
   um_metric — one metric tile: big number + a "change vs. previous period" line.
-  Params: value (number|nil), label, delta (signed number|nil), suffix ("%" or
-  "pt" for the delta unit), value_suffix (appended to the number, e.g. "%"),
-  value_class (size classes), delta_class (extra classes on the delta line,
-  e.g. to hide it on cramped screens). Isolated scope, so all data is passed in.
+  Params: value (number|nil), label, delta (signed number|nil), suffix (delta
+  unit, default "%"; "pt" for bounce rate), value_suffix (appended to the
+  number, e.g. "%"), value_class (size classes, default value--large),
+  delta_class (extra classes on the delta line, e.g. to hide it on cramped
+  screens). Isolated scope, so all data is passed in.
 {%- endcomment -%}
 {% template um_metric %}
+{%- assign suffix = suffix | default: '%' -%}
+{%- assign value_class = value_class | default: 'value--large' -%}
 <div class="item bg--white rounded--medium">
   <div class="content w--full">
     <div class="px--4 pt--4 w--full">
@@ -164,10 +167,10 @@
       var labels = { style: { fontSize: font, color: ink } };
       var series = [];
       {%- if show_visitors -%}
-      series.push({ name: "Visitors", dashStyle: "Solid", data: fillGaps([{% for p in visitor_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}]{% unless forloop.last %}, {% endunless %}{% endfor %}]) });
+      series.push({ name: "Visitors", dashStyle: "Solid", data: fillGaps([{% for p in visitor_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}],{% endfor %}]) });
       {%- endif -%}
       {%- if show_pageviews -%}
-      series.push({ name: "Pageviews", dashStyle: "ShortDot", yAxis: dual ? 1 : 0, data: fillGaps([{% for p in pv_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}]{% unless forloop.last %}, {% endunless %}{% endfor %}]) });
+      series.push({ name: "Pageviews", dashStyle: "ShortDot", yAxis: dual ? 1 : 0, data: fillGaps([{% for p in pv_points %}[{{ p.x | date: '%s' | append: '000' }}, {{ p.y }}],{% endfor %}]) });
       {%- endif -%}
       {%- comment -%}
         Dual axes name their series in a title sitting above each axis — left for
