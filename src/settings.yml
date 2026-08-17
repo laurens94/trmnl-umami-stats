@@ -33,7 +33,7 @@ custom_fields:
     placeholder: Project Name
     description: Shown in the footer
   - keyname: icon_url
-    field_type: url
+    field_type: string
     name: Icon URL
     optional: true
     placeholder: https://example.com/icon.svg
