@@ -39,12 +39,17 @@ custom_fields:
       - Umami Cloud: cloud
       - Self-hosted: self_hosted
     default: cloud
-    description: Umami Cloud (api.umami.is, API key) or your own self-hosted instance (URL + bearer token).
+    description: Umami Cloud (api.umami.is + API key) or your own self-hosted instance (URL + bearer token).
+    conditional_validation:
+      - when: cloud
+        hidden:
+          - umami_url
   - keyname: umami_url
     field_type: url
     name: Umami URL
+    optional: true
     placeholder: https://analytics.example.com
-    description: Self-hosted only — your instance base URL, no trailing slash (the plugin appends /api/websites/…). Ignored for Umami Cloud.
+    description: Your instance base URL, no trailing slash (the plugin appends /api/websites/…).
   - keyname: umami_token
     field_type: password
     name: API Key / Token
@@ -72,6 +77,13 @@ custom_fields:
       - Pageviews only: pageviews
     default: both
     description: Which daily lines the chart draws — Visitors is solid, Pageviews dotted.
+    conditional_validation:
+      - when: visitors
+        hidden:
+          - chart_axes
+      - when: pageviews
+        hidden:
+          - chart_axes
   - keyname: chart_axes
     field_type: select
     name: Chart Y Axis
@@ -79,6 +91,6 @@ custom_fields:
       - Shared: single
       - One per line: dual
     default: dual
-    description: Only applies when both lines are shown. Pageviews outnumber visitors, so a shared axis flattens the Visitors line; one axis per line (left = Visitors, right = Pageviews) gives each its own scale.
+    description: Pageviews outnumber visitors, so a shared axis flattens the Visitors line; One axis per line (left = Visitors, right = Pageviews) gives each its own scale.
 name: Umami Stats
 refresh_interval: 15
