@@ -178,8 +178,9 @@
       var axisTitle = function (text, side) {
         return { text: text, align: "high", textAlign: side, rotation: 0, offset: 0, y: -px(12), reserveSpace: false, style: { fontSize: font, color: ink } };
       };
-      var yAxis = { title: { text: null }, min: 0, tickAmount: 4, labels: labels, gridLineWidth: px(1), gridLineColor: ink, gridLineDashStyle: "ShortDot" };
-      Highcharts.chart(elId, TRMNLCharts.merge(TRMNLCharts.options({ el: elId }), {
+      {%- comment -%} Counts are whole numbers, so force integer ticks (no 1.2 / 2.4 visitors). {%- endcomment -%}
+      var yAxis = { title: { text: null }, min: 0, allowDecimals: false, tickAmount: 4, labels: labels, gridLineWidth: px(1), gridLineColor: ink, gridLineDashStyle: "ShortDot" };
+      return Highcharts.chart(elId, TRMNLCharts.merge(TRMNLCharts.options({ el: elId }), {
         {%- comment -%}
           Dual axes need top spacing for their titles; single-axis charts get it
           from the legend. The bottom cushion gives the date labels' descenders
