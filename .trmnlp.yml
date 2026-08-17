@@ -22,6 +22,7 @@ custom_fields:
   umami_token: "{{ env.UMAMI_TOKEN }}"
   umami_website_id: "{{ env.UMAMI_WEBSITE_ID }}"
   project_name: "Umami Stats"
+  icon_url: ""
   date_from: 14
   chart_lines: both
   chart_axes: dual

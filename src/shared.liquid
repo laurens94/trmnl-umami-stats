@@ -223,15 +223,22 @@
 {% endtemplate %}
 
 {%- comment -%}
-  um_title_bar — shared footer. Params: trmnl (namespace,
-  must be passed since render scope is isolated).
+  um_title_bar — shared footer. Params: trmnl (namespace, must be passed since
+  render scope is isolated). An icon_url swaps the Umami logo for the user's
+  own icon; the framework's .image class caps its height per layout.
 {%- endcomment -%}
 {% template um_title_bar %}
+{%- assign fields = trmnl.plugin_settings.custom_fields_values -%}
+{%- assign days = fields.date_from | default: 30 | plus: 0 -%}
 <div class="title_bar bg--white">
+  {%- if fields.icon_url != blank -%}
+  <img class="image" src="{{ fields.icon_url }}" />
+  {%- else -%}
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 428 389.11" fill="currentColor">
     <g><g><circle cx="214.15" cy="181" r="171" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="20"></circle><path d="M413 134.11H15.29a15 15 0 0 0-15 15v15.3C.12 168 0 171.52 0 175.11c0 118.19 95.81 214 214 214 116.4 0 211.1-92.94 213.93-208.67 0-.44.07-.88.07-1.33v-30a15 15 0 0 0-15-15"></path></g></g>
   </svg>
-  <span class="title">{{ trmnl.plugin_settings.custom_fields_values.project_name | truncate: 32 }}</span>
-  <span class="instance">Past {{ trmnl.plugin_settings.custom_fields_values.date_from | default: 30 }} days</span>
+  {%- endif -%}
+  <span class="title">{{ fields.project_name | truncate: 32 }}</span>
+  <span class="instance">Past {{ days }} day{% if days != 1 %}s{% endif %}</span>
 </div>
 {% endtemplate %}

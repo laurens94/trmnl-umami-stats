@@ -32,6 +32,12 @@ custom_fields:
     name: Project Name
     placeholder: Project Name
     description: Shown in the footer
+  - keyname: icon_url
+    field_type: url
+    name: Icon URL
+    optional: true
+    placeholder: https://example.com/icon.svg
+    description: Custom footer icon (a square SVG or PNG, ~24px, works best). A data URI (data:image/png;base64...) is also supported. Leave empty for the Umami logo.
   - keyname: umami_hosting
     field_type: select
     name: Umami Hosting

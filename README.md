@@ -44,6 +44,7 @@ Set these custom fields (in the TRMNL UI, or in `.trmnlp.yml` for local dev):
 | `umami_token` | Umami Cloud API key, or a self-hosted bearer token (see below) |
 | `umami_website_id` | The website's UUID (Umami → Settings → Websites → Edit → Website ID) |
 | `project_name` | Shown in the footer |
+| `icon_url` | Optional footer icon URL (a square SVG or PNG works best); empty shows the Umami logo |
 | `date_from` | Days of history to fetch (e.g. `30`) |
 | `chart_lines` | Which lines the chart draws: `both`, `visitors`, or `pageviews` |
 | `chart_axes` | With both lines: `single` shared y axis, or `dual` (left = visitors, right = pageviews) |
