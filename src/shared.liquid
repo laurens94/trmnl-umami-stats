@@ -1,8 +1,4 @@
 <script src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
-<script type="text/javascript">
-  // No animation anywhere
-  Highcharts.setOptions({ chart: { animation: false }, plotOptions: { series: { animation: false } } });
-</script>
 {%- comment -%}
   Shared data prep — trmnlp automatically prepends this file (src/shared.liquid)
   to every view, so the variables and {% template %} partials below are
@@ -189,8 +185,8 @@
           from the legend. The bottom cushion gives the date labels' descenders
           (the tail of the "g" in "Aug") room so they don't clip at the edge.
         {%- endcomment -%}
-        chart: { type: "spline", height: null, spacing: [dual ? px(32) : px(2), px(4), px(8), 0], backgroundColor: "transparent" },
-        title: { text: null }, credits: { enabled: false }, tooltip: { enabled: false },
+        {%- comment -%} animation: false restates the TRMNLCharts.options() default for trmnlp lint, which only greps the markup. {%- endcomment -%}
+        chart: { type: "spline", animation: false, height: null, spacing: [dual ? px(32) : px(2), px(4), px(8), 0] },
         legend: { enabled: !dual, align: "right", verticalAlign: "top", margin: px(4), padding: 0, symbolWidth: px(28), itemStyle: { fontSize: font, fontWeight: "400", color: ink } },
         xAxis: {
           type: "datetime", labels: labels, tickPixelInterval: px(110),
@@ -201,11 +197,20 @@
           Highcharts.merge(yAxis, { title: axisTitle("— Visitors", "left") }),
           Highcharts.merge(yAxis, { gridLineWidth: 0, opposite: true, title: axisTitle("⋯ Pageviews", "right") })
         ] : yAxis,
-        plotOptions: { spline: { color: ink, lineWidth: px(3), marker: { enabled: false }, enableMouseTracking: false } },
+        plotOptions: { spline: { color: ink, lineWidth: px(3) } },
         series: series
       }));
     };
-    TRMNLCharts.watch(elId, build);
+    {%- comment -%}
+      The trmnl.com editor preview injects scripts asynchronously, so Highcharts
+      and plugins.js may not have loaded when this runs. Poll for both instead
+      of assuming script order (the framework docs' whenReady pattern).
+    {%- endcomment -%}
+    var tries = 0;
+    (function whenReady() {
+      if (window.Highcharts && window.TRMNLCharts) { TRMNLCharts.watch(elId, build); }
+      else if (tries++ < 100) { setTimeout(whenReady, 50); }
+    })();
   })();
 </script>
 {% endtemplate %}
@@ -235,13 +240,15 @@
 {%- assign days = fields.date_from | default: 30 | plus: 0 -%}
 <div class="title_bar bg--white">
   {%- if fields.icon_url != blank -%}
-  <img class="image" src="{{ fields.icon_url }}" />
+    <img class="image" src="{{ fields.icon_url }}" />
   {%- else -%}
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 428 389.11" fill="currentColor">
-    <g><g><circle cx="214.15" cy="181" r="171" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="20"></circle><path d="M413 134.11H15.29a15 15 0 0 0-15 15v15.3C.12 168 0 171.52 0 175.11c0 118.19 95.81 214 214 214 116.4 0 211.1-92.94 213.93-208.67 0-.44.07-.88.07-1.33v-30a15 15 0 0 0-15-15"></path></g></g>
-  </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 428 389.11" fill="currentColor">
+      <g><g><circle cx="214.15" cy="181" r="171" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="20"></circle><path d="M413 134.11H15.29a15 15 0 0 0-15 15v15.3C.12 168 0 171.52 0 175.11c0 118.19 95.81 214 214 214 116.4 0 211.1-92.94 213.93-208.67 0-.44.07-.88.07-1.33v-30a15 15 0 0 0-15-15"></path></g></g>
+    </svg>
   {%- endif -%}
   <span class="title">{{ fields.project_name | truncate: 32 }}</span>
-  <span class="instance">Past {{ days }} day{% if days != 1 %}s{% endif %}</span>
+  <span class="instance"
+    >Past {{ days }} day{% if days != 1 %}s{% endif -%}
+  </span>
 </div>
 {% endtemplate %}
