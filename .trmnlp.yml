@@ -17,7 +17,7 @@ watch:
 # Secrets live in .env (gitignored); copy .env.example to .env and fill it in.
 # bin/trmnlp loads .env automatically.
 custom_fields:
-  umami_hosting: self_hosted
+  umami_hosting: cloud
   umami_url: "{{ env.UMAMI_URL }}"
   umami_token: "{{ env.UMAMI_TOKEN }}"
   umami_website_id: "{{ env.UMAMI_WEBSITE_ID }}"
