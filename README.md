@@ -41,7 +41,7 @@ Set these custom fields (in the TRMNL UI, or in `.trmnlp.yml` for local dev):
 | --- | --- |
 | `umami_hosting` | **Umami Cloud** or **Self-hosted** — sets the base URL and auth scheme |
 | `umami_url` | Self-hosted only: instance base URL, e.g. `https://analytics.example.com` (no trailing slash). Ignored for Cloud |
-| `umami_token` | Umami Cloud API key, or a self-hosted bearer token (see below) |
+| `umami_token` | Umami API key (see below) |
 | `umami_website_id` | The website's UUID (Umami → Settings → Websites → Edit → Website ID) |
 | `project_name` | Shown in the footer |
 | `icon_url` | Optional footer icon URL (a square SVG or PNG works best); empty shows the Umami logo |
@@ -49,12 +49,13 @@ Set these custom fields (in the TRMNL UI, or in `.trmnlp.yml` for local dev):
 | `chart_lines` | Which lines the chart draws: `both`, `visitors`, or `pageviews` |
 | `chart_axes` | With both lines: `single` shared y axis, or `dual` (left = visitors, right = pageviews) |
 
-### Getting an API key / token
+### Getting an API key
 
-**Umami Cloud:** create an API key in your account settings
-([docs](https://umami.is/docs/cloud/api-key)) and use it as `umami_token`.
+Create an API key in your Umami account settings
+([docs](https://umami.is/docs/cloud/api-key)) and use it as `umami_token`. This
+works for both Umami Cloud and self-hosted.
 
-**Self-hosted:** the API uses a bearer token. A helper script wraps the
+**Self-hosted alternative:** use a login token instead. A helper script wraps the
 [login endpoint](https://umami.is/docs/api/authentication) — it reads `UMAMI_URL`
 from `.env` (or prompts), asks for your username/password, and prints the token:
 
@@ -65,7 +66,7 @@ from `.env` (or prompts), asks for your username/password, and prints the token:
 
 No repo checked out? Grab a token with a single command — fill in your host,
 username, and password, then paste the printed token into the plugin's **API
-Key / Token** field in the TRMNL UI:
+Key** field in the TRMNL UI:
 
 ```bash
 curl -s -X POST "https://analytics.example.com/api/auth/login" -H 'Content-Type: application/json' -d '{"username":"admin","password":"YOUR_PASSWORD"}' | jq -r '.token'

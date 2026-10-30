@@ -45,7 +45,7 @@ custom_fields:
       - Umami Cloud: cloud
       - Self-hosted: self_hosted
     default: cloud
-    description: Umami Cloud (api.umami.is + API key) or your own self-hosted instance (URL + bearer token).
+    description: Umami Cloud (api.umami.is + API key) or your own self-hosted instance (URL + API key).
     conditional_validation:
       - when: cloud
         hidden:
@@ -58,10 +58,10 @@ custom_fields:
     description: Your instance base URL, no trailing slash (the plugin appends /api/websites/…).
   - keyname: umami_token
     field_type: password
-    name: API Key / Token
-    description: Umami Cloud API key, or a self-hosted bearer token.
+    name: API Key
+    description: Your Umami API key.
     help_text: >-
-      Cloud — create an API key in your Umami account settings. Self-hosted — run
+      Create an API key in your Umami account settings (recommended). Self-hosted also accepts a login token:
       <code>curl -s -X POST "https://analytics.example.com/api/auth/login" -H 'Content-Type: application/json' -d '{"username":"admin","password":"YOUR_PASSWORD"}' | jq -r '.token'</code>.
       See the <a href="https://umami.is/docs/api/authentication" class="underline">Umami API docs</a>.
   - keyname: umami_website_id
