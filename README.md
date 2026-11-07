@@ -4,6 +4,7 @@ A [TRMNL](https://usetrmnl.com) e-ink plugin that shows your [Umami](https://uma
 web-analytics at a glance: **visitors**, **pageviews**, **visits**, and **bounce
 rate** for the period, each with its **change vs. the previous period**, plus a
 **daily chart** of visitors (solid) and pageviews (dotted) with dated axis ticks.
+Optionally filter everything by a saved Umami **segment**.
 
 Built on TRMNL **Framework v3.2** and tuned for **TRMNL X**: responsive sizing,
 a light-gray-with-white-cards default that follows your device's **theme and dark
@@ -43,6 +44,7 @@ Set these custom fields (in the TRMNL UI, or in `.trmnlp.yml` for local dev):
 | `umami_url` | Self-hosted only: instance base URL, e.g. `https://analytics.example.com` (no trailing slash). Ignored for Cloud |
 | `umami_token` | Umami API key (see below) |
 | `umami_website_id` | The website's UUID (Umami → Settings → Websites → Edit → Website ID) |
+| `umami_segment` | Optional saved segment ID. Select the segment in Umami and copy the ID after `segment=` in the URL. Empty counts all visitors |
 | `project_name` | Shown in the footer |
 | `icon_url` | Optional footer icon URL (a square SVG or PNG works best); empty shows the Umami logo |
 | `date_from` | Days of history to fetch (e.g. `30`) |

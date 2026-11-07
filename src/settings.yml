@@ -15,16 +15,17 @@ serverless_language: ""
 # pass). `base` switches on the umami_hosting field: Umami Cloud lives at
 # api.umami.is/v1 with an x-umami-api-key header; self-hosted is {umami_url}/api
 # with an Authorization: Bearer header. Both differences are resolved in Liquid.
+# An optional umami_segment appends &segment=<id> to both requests.
 polling_url: |
-  {%- assign win = date_from | default: 30 | times: 86400 -%}{%- if umami_hosting == 'cloud' -%}{%- assign base = 'https://api.umami.is/v1' -%}{%- else -%}{%- assign base = umami_url | append: '/api' -%}{%- endif -%}{{base}}/websites/{{umami_website_id}}/stats?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}
-  {{base}}/websites/{{umami_website_id}}/pageviews?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}&unit=day
+  {%- assign win = date_from | default: 30 | times: 86400 -%}{%- if umami_hosting == 'cloud' -%}{%- assign base = 'https://api.umami.is/v1' -%}{%- else -%}{%- assign base = umami_url | append: '/api' -%}{%- endif -%}{%- if umami_segment != blank -%}{%- assign seg = '&segment=' | append: umami_segment -%}{%- endif -%}{{base}}/websites/{{umami_website_id}}/stats?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}{{seg}}
+  {{base}}/websites/{{umami_website_id}}/pageviews?startAt={{ 'now' | date: '%s' | minus: win | times: 1000 }}&endAt={{ 'now' | date: '%s' | times: 1000 }}&unit=day{{seg}}
 polling_headers: "{%- if umami_hosting == 'cloud' -%}x-umami-api-key={{umami_token}}{%- else -%}Authorization=Bearer {{umami_token}}{%- endif -%}"
 id: 367986
 custom_fields:
   - keyname: author_bio
     name: Umami Stats
     field_type: author_bio
-    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a daily chart of visitors and pageviews.
+    description: Umami web-analytics at a glance — visitors, pageviews, visits and bounce rate for the period, each with its change vs. the previous period, plus a daily chart of visitors and pageviews. Optionally filtered by a saved Umami segment.
     github_url: https://github.com/laurens94/trmnl-umami-stats
     category: analytics
   - keyname: project_name
@@ -68,6 +69,12 @@ custom_fields:
     field_type: string
     name: Umami Website ID
     description: The website's UUID (Settings → Websites → Edit → Website ID)
+  - keyname: umami_segment
+    field_type: string
+    name: Segment ID
+    optional: true
+    placeholder: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    description: Only count visitors in a saved segment. Select the segment in Umami and copy the ID after segment= in the URL. Leave empty for all visitors.
   - keyname: date_from
     field_type: number
     name: No. of days
